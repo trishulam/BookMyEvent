@@ -1,0 +1,458 @@
+openapi: 3.0.0
+info:
+  title: Event Management API
+  version: 1.0.0
+paths:
+  /signup:
+    post:
+      summary: Sign up a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSignUp'
+      responses:
+        '201':
+          description: User signed up successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '409':
+          description: User already exists
+        '500':
+          description: Something went wrong
+
+  /login:
+    post:
+      summary: Log in a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  admin:
+                    type: boolean
+                  user_id:
+                    type: integer
+        '401':
+          description: Invalid password
+        '404':
+          description: User does not exist
+        '500':
+          description: Something went wrong
+
+  /users:
+    get:
+      summary: Get all users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    get:
+      summary: Get a user by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        responses:
+          '200':
+            description: User information
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/User'
+          '404':
+            description: User not found
+          '500':
+            description: Something went wrong
+
+  /addvenue:
+    post:
+      summary: Add a new venue
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VenueAdd'
+      responses:
+        '201':
+          description: Venue added successfully
+        '500':
+          description: Something went wrong
+
+  /deletevenue:
+    post:
+      summary: Delete a venue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VenueDelete'
+      responses:
+        '200':
+          description: Venue deleted successfully
+        '500':
+          description: Something went wrong
+
+  /updatevenue:
+    post:
+      summary: Update a venue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VenueUpdate'
+      responses:
+        '200':
+          description: Venue updated successfully
+        '500':
+          description: Something went wrong
+
+  /venues:
+    get:
+      summary: Get venues
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of venues
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Venue'
+
+  /venue/{id}:
+    get:
+      summary: Get a venue by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        responses:
+          '200':
+            description: Venue information
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Venue'
+
+  /addevent:
+    post:
+      summary: Add a new event
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventAdd'
+      responses:
+        '201':
+          description: Event added successfully
+        '500':
+          description: Something went wrong
+
+  /deleteevent:
+    post:
+      summary: Delete an event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventDelete'
+      responses:
+        '200':
+          description: Event deleted successfully
+        '500':
+          description: Something went wrong
+
+  /updateevent:
+    post:
+      summary: Update an event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdate'
+      responses:
+        '200':
+          description: Event updated successfully
+        '500':
+          description: Something went wrong
+
+  /venueevents/{id}:
+    get:
+      summary: Get events by venue ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        responses:
+          '200':
+            description: List of events
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Event'
+
+  /events/{id}:
+    get:
+      summary: Get an event by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        responses:
+          '200':
+            description: Event information
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Event'
+
+  /tags:
+    get:
+      summary: Get tags and their counts
+      responses:
+        '200':
+          description: List of tags with counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TagCount'
+
+components:
+  schemas:
+    UserSignUp:
+      type: object
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - username
+        - password
+
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        username:
+          type: string
+        admin:
+          type: boolean
+
+    VenueAdd:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        description:
+          type: string
+        capacity:
+          type: string
+        file:
+          type: string
+          format: binary
+
+    VenueDelete:
+      type: object
+      properties:
+        id:
+          type: integer
+
+    VenueUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        description:
+          type: string
+        capacity:
+          type: string
+
+    Venue:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        description:
+          type: string
+        capacity:
+          type: string
+        image:
+          type: string
+        events:
+          type: string
+
+    EventAdd:
+      type: object
+      properties:
+        name:
+          type: string
+        date:
+          type: string
+        time:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+        venue_id:
+          type: string
+        tags:
+          type: string
+        file:
+          type: string
+          format: binary
+
+    EventDelete:
+      type: object
+      properties:
+        id:
+          type: integer
+
+    EventUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        date:
+          type: string
+        time:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        venue_id:
+          type: string
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        date:
+          type: string
+        time:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+        venue_id:
+          type: integer
+        image:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        rating:
+          type: number
+
+    TagCount:
+      type: object
+      properties:
+        name:
+          type: string
+        count:
+          type: integer
+
+securitySchemes:
+  BearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
